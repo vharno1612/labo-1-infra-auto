@@ -1,24 +1,15 @@
-pipeline {
-    agent any
-
-    stages {
-        stage('Build') {
-            steps {
-                build job: 'BuildSampleApp'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                build job: 'TestSampleApp'
-            }
-        }
-
-        stage('Cleanup') {
-            steps {
-                sh 'docker stop samplerunning || true'
-                sh 'docker rm samplerunning || true'
-            }
+node {
+    stage('Preparation') {
+        catchError(buildResult: 'SUCCESS') {
+            sh 'docker stop samplerunning'
+            sh 'docker rm samplerunning'
         }
     }
+    stage('Build') {
+        build 'BuildSampleApp'
+    }
+    stage('Results') {
+        build 'TestSampleApp'
+    }
 }
+
